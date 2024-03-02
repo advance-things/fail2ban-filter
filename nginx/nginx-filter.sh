@@ -54,10 +54,12 @@ for log_group in "${!log_groups[@]}"; do
     IFS=' ' read -r method status_code user_agent <<< "$log_group"
     paths="${log_groups[$log_group]}"
     combined_path="$(combine_routes ${paths[@]})"
-    combined_path="${combined_path//$prefix\/}"
+    if [ "$combined_path" == "/" ]; then
+        combined_path=""
+    fi
     regex_pattern="^<HOST> .*"
     if [ "$method" ]; then
-        regex_pattern+=" \"$method /$prefix($combined_path) .*\""
+        regex_pattern+=" \"$method /$prefix$combined_path .*\""
     fi
     if [ "$status_code" ]; then
         regex_pattern+=" $status_code .*$"
@@ -65,3 +67,4 @@ for log_group in "${!log_groups[@]}"; do
     echo "Generated regex pattern:"
     echo "$regex_pattern"
 done
+
